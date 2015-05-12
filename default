@@ -4,16 +4,16 @@
 # default
 #
 # A very simple solution to the multilingual document language prediction
-# task. 
+# task.
 #
 # Method: Use monolingual training documents to create a byte n-gram (length specified
 # by -n option) dictionary for each language. Then, for each document in the test set,
-# maintain a k-dimensional vector where k is the number of possible languages in 
+# maintain a k-dimensional vector where k is the number of possible languages in
 # the language set. For each byte ngram in the test doc, add 1 to the dimension(s) of
-# the vector corresponding to a dictionary match for that language. Once we've 
+# the vector corresponding to a dictionary match for that language. Once we've
 # tallied all the ngrams in the doc, normalize the vector by dividing by its total
 # sum across languages.
-# 
+#
 
 import optparse
 import os
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     optparser.add_option("-d", "--monodir", dest="monodir", default="data-train/docsMR", help="Directory containing monolingual training data")
     optparser.add_option("-m", "--monometa", dest="monometa", default="data-train/docsMR-meta", help="File containing monolingual metadata")
     optparser.add_option("-t", "--testdir", dest="testdir", default="data-dev", help="Directory containing docs on which to run prediction")
-    optparser.add_option("-n", "--ngramlen", dest="ngramlen", type='int', default=3, help="Length of byte n-grams for language dictionaries")
+    optparser.add_option("-n", "--ngramlen", dest="ngramlen", type='int', default=20, help="Length of byte n-grams for language dictionaries")
     optparser.add_option("-k", "--vocablen", dest="vocablen", type='int', default=500, help="Number of byte n-grams for each language to retain in dictionary")
     opts = optparser.parse_args()[0]
 

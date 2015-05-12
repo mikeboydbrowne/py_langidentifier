@@ -4,16 +4,16 @@
 # baseline
 #
 # A baseline solution to the multilingual document language prediction
-# task. 
+# task.
 #
 # Method: Use monolingual training documents to create a byte n-gram (length specified
 # by -n option) dictionary for each language. Then, for each document in the test set,
-# maintain a k-dimensional vector where k is the number of possible languages in 
+# maintain a k-dimensional vector where k is the number of possible languages in
 # the language set. For each byte ngram in the test doc, add 1 to the dimension(s) of
-# the vector corresponding to a dictionary match for that language. Once we've 
+# the vector corresponding to a dictionary match for that language. Once we've
 # tallied all the ngrams in the doc, normalize the vector by dividing by its total
 # sum across languages.
-# 
+#
 import optparse
 import os
 from collections import Counter
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     optparser.add_option("-l", "--langfile", dest="langfile", default="data-train/selected_langs", help="File containing all possible languages in set")
     optparser.add_option("-d", "--monodir", dest="monodir", default="data-train/docsMR", help="Directory containing monolingual training data")
     optparser.add_option("-m", "--monometa", dest="monometa", default="data-train/docsMR-meta", help="File containing monolingual metadata")
-    optparser.add_option("-t", "--testdir", dest="testdir", default="data-dev", help="Directory containing test docs")
-    optparser.add_option("-n", "--ngramlen", dest="ngramlen", type='int', default=5, help="Length of byte n-grams for language dictionaries")
+    optparser.add_option("-t", "--testdir", dest="testdir", default="data-test", help="Directory containing test docs")
+    optparser.add_option("-n", "--ngramlen", dest="ngramlen", type='int', default=6, help="Length of byte n-grams for language dictionaries")
     optparser.add_option("-b", "--bytegram", dest="bytegram", default=False, action="store_true")
     opts = optparser.parse_args()[0]
 
@@ -58,9 +58,13 @@ if __name__ == "__main__":
     lang_dicts = {l: Counter() for l in lang_doc.keys()}
 
     #### YOUR CODE HERE ####
+    for lang in lang_dicts.keys():
+        sys.stderr.write("%s\n" % lang)
+        for doc in lang_doc[lang]:
+            lang_dicts[lang] += count_ngrams(os.path.join(opts.monodir, doc), opts.ngramlen, True)
+    lang_dicts[lang] = Counter({l: c for l, c in lang_dicts[lang].most_common(750)})
     # Create a dictionary for each language in lang_dicts. Each dictionary is a Counter object that maps
     # n-grams to an integer count for that language in the training data
-
 
     # Predict languages for each doc in the test set
     language_order = sorted(lang_doc.keys())  # so we can make sure we output in correct order
@@ -73,9 +77,10 @@ if __name__ == "__main__":
             language_counter = Counter({l: 0 for l in lang_dicts})  # setup language vector
 
             #### YOUR CODE HERE ####
-            # Count the number of byte ngram hits in the document for each lang_dict, and 
-            # output the predicted proportion for each language. Implementing a threshold
-            # to determine which languages to include in the result will improve your score.
+            ngrams = count_ngrams(os.path.join(opts.testdir, doc), opts.ngramlen, True)  # count n-grams
+            for lang in language_counter:  # sort through language dictionaries to see if how many ngram matches there are
+                language_counter[lang] += sum([1 for grm in ngrams if grm in lang_dicts[lang]])
+            total_matches = float(sum(language_counter.values()))  # divide by this so that vector sums to 1
 
             sys.stdout.write('%s ||| %s\n' % (doc, ','.join([str(matches) for matches in [language_counter[lang] for lang in language_order]])))
 
